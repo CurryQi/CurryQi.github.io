@@ -1,0 +1,485 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>1.1 传输介质、帧结构、IP地址、ICMP协议、ARP协议、传输层协议及数据转发过程 | CurryQi's Blog</title><meta name="description" content="1.1 传输介质、帧结构、IP地址、ICMP协议、ARP协议、传输层协议及数据转发过程"><meta name="keywords" content="TCP/IP基础"><meta name="author" content="CurryQi"><meta name="copyright" content="CurryQi"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="1.1 传输介质、帧结构、IP地址、ICMP协议、ARP协议、传输层协议及数据转发过程"><meta name="twitter:description" content="1.1 传输介质、帧结构、IP地址、ICMP协议、ARP协议、传输层协议及数据转发过程"><meta name="twitter:image" content="https://curryqi/github.io/img/post.jpg"><meta property="og:type" content="article"><meta property="og:title" content="1.1 传输介质、帧结构、IP地址、ICMP协议、ARP协议、传输层协议及数据转发过程"><meta property="og:url" content="https://curryqi/github.io/2020/04/05/1-%E4%BC%A0%E8%BE%93%E4%BB%8B%E8%B4%A8%E3%80%81%E5%B8%A7%E7%BB%93%E6%9E%84%E3%80%81IP%E5%9C%B0%E5%9D%80%E3%80%81ICMP%E5%8D%8F%E8%AE%AE%E3%80%81ARP%E5%8D%8F%E8%AE%AE%E3%80%81%E4%BC%A0%E8%BE%93%E5%B1%82%E5%8D%8F%E8%AE%AE%E5%8F%8A%E6%95%B0%E6%8D%AE%E8%BD%AC%E5%8F%91%E8%BF%87%E7%A8%8B/"><meta property="og:site_name" content="CurryQi's Blog"><meta property="og:description" content="1.1 传输介质、帧结构、IP地址、ICMP协议、ARP协议、传输层协议及数据转发过程"><meta property="og:image" content="https://curryqi/github.io/img/post.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://curryqi/github.io/2020/04/05/1-%E4%BC%A0%E8%BE%93%E4%BB%8B%E8%B4%A8%E3%80%81%E5%B8%A7%E7%BB%93%E6%9E%84%E3%80%81IP%E5%9C%B0%E5%9D%80%E3%80%81ICMP%E5%8D%8F%E8%AE%AE%E3%80%81ARP%E5%8D%8F%E8%AE%AE%E3%80%81%E4%BC%A0%E8%BE%93%E5%B1%82%E5%8D%8F%E8%AE%AE%E5%8F%8A%E6%95%B0%E6%8D%AE%E8%BD%AC%E5%8F%91%E8%BF%87%E7%A8%8B/"><link rel="prev" title="5 DHCP、FTP、Telnet" href="https://curryqi/github.io/2020/04/05/5-DHCP%E3%80%81FTP%E3%80%81Telnet/"><link rel="next" title="Hello World" href="https://curryqi/github.io/2020/04/05/hello-world/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">4</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">3</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 个人</span></a></div><div class="menus_item"><a class="site-page" href="/summary/"><i class="fa-fw fa fa-bookmark"></i><span> 年终</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 相片</span></a></li></ul></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-传输介质"><span class="toc-number">1.</span> <span class="toc-text">1 传输介质</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-通信设备与介质"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 通信设备与介质</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-简单网络简介"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 简单网络简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-通信介质"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 通信介质</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-1-同轴电缆"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.3.1 同轴电缆</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-2-双绞线-Twisted-Pair"><span class="toc-number">1.3.2.</span> <span class="toc-text">1.3.2 双绞线(Twisted Pair)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-3-光纤"><span class="toc-number">1.3.3.</span> <span class="toc-text">1.3.3 光纤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-4-串口电缆"><span class="toc-number">1.3.4.</span> <span class="toc-text">1.3.4 串口电缆</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-冲突域、冲突检测"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 冲突域、冲突检测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-通信模式"><span class="toc-number">1.5.</span> <span class="toc-text">1.5 通信模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-以太网帧"><span class="toc-number">2.</span> <span class="toc-text">2 以太网帧</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-网络通信协议种类"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 网络通信协议种类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-OSI七层模型"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 OSI七层模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-TCP-IP分层模型"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 TCP&#x2F;IP分层模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-以太网常见数据帧格式"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 以太网常见数据帧格式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-1-Ethernet-II（以太网多用）"><span class="toc-number">2.4.1.</span> <span class="toc-text">2.4.1 Ethernet II（以太网多用）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-2-IEEE-802-3"><span class="toc-number">2.4.2.</span> <span class="toc-text">2.4.2 IEEE 802.3</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-3-LLC与SNAP"><span class="toc-number">2.4.3.</span> <span class="toc-text">2.4.3 LLC与SNAP</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-以太网的MAC地址"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 以太网的MAC地址</span></a></li></ol></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(/img/post.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">CurryQi's Blog</a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 个人</span></a></div><div class="menus_item"><a class="site-page" href="/summary/"><i class="fa-fw fa fa-bookmark"></i><span> 年终</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 相片</span></a></li></ul></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">1.1 传输介质、帧结构、IP地址、ICMP协议、ARP协议、传输层协议及数据转发过程</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2020-04-05 18:31:40"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2020-04-05</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2020-04-05 19:03:49"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2020-04-05</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E8%B7%AF%E7%94%B1%E5%99%A8%E5%88%9D%E7%BA%A7/">路由器初级</a></span></div><div class="meta-secondline"> </div><div class="meta-thirdline"><span class="post-meta-pv-cv"><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><h1 id="1-传输介质"><a href="#1-传输介质" class="headerlink" title="1 传输介质"></a>1 传输介质</h1><h2 id="1-1-通信设备与介质"><a href="#1-1-通信设备与介质" class="headerlink" title="1.1 通信设备与介质"></a>1.1 通信设备与介质</h2><ul>
+<li>通信设备：PC、服务器等</li>
+<li>通行传输介质：同轴电缆、双绞线、光纤等</li>
+<li>通信传输介质影响：线路编码方式、传输速度、传输距离</li>
+</ul>
+<h2 id="1-2-简单网络简介"><a href="#1-2-简单网络简介" class="headerlink" title="1.2 简单网络简介"></a>1.2 简单网络简介</h2><ul>
+<li>需求：终端互相传递信息、资源共享</li>
+<li>网络：一条承载数据传输的物理介质，连接两个终端，组成一个最简单的网络<ul>
+<li>终端：产生数据、发送数据、接受数据</li>
+<li>介质：用来传输数据的物理载体</li>
+<li>网络：连接终端，建立通信的媒介；使用介质，进行数据传输</li>
+</ul>
+</li>
+<li>性能指标：稳、快、准</li>
+</ul>
+<h2 id="1-3-通信介质"><a href="#1-3-通信介质" class="headerlink" title="1.3 通信介质"></a>1.3 通信介质</h2><h3 id="1-3-1-同轴电缆"><a href="#1-3-1-同轴电缆" class="headerlink" title="1.3.1 同轴电缆"></a>1.3.1 同轴电缆</h3><table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">以太网标准</th>
+<th align="center">直径</th>
+<th align="center">最长有效传输距离</th>
+<th align="center">接头</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">粗缆</td>
+<td align="center">10BASE5</td>
+<td align="center">9.5mm</td>
+<td align="center">500米</td>
+<td align="center">N型接头</td>
+</tr>
+<tr>
+<td align="center">细缆</td>
+<td align="center">10BASE2</td>
+<td align="center">5mm</td>
+<td align="center">185米</td>
+<td align="center">BNC接头</td>
+</tr>
+</tbody></table>
+<ul>
+<li>10BASE5 和 10BASE2 为两种早期以太网标准，均支持 10Mbps 的传输速率</li>
+<li>目前 10Mbps 无法满足企业网络需求，基本不用</li>
+</ul>
+<h3 id="1-3-2-双绞线-Twisted-Pair"><a href="#1-3-2-双绞线-Twisted-Pair" class="headerlink" title="1.3.2 双绞线(Twisted Pair)"></a>1.3.2 双绞线(Twisted Pair)</h3><table>
+<thead>
+<tr>
+<th align="center">以太网</th>
+<th align="center">线缆类别</th>
+<th align="center">最长有效传输距离</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">10BASE-T</td>
+<td align="center">两对3/4/5类双绞线</td>
+<td align="center">100米</td>
+</tr>
+<tr>
+<td align="center">100BASE-TX</td>
+<td align="center">两对5类双绞线</td>
+<td align="center">100米</td>
+</tr>
+<tr>
+<td align="center">1000BASE-T</td>
+<td align="center">四对5e类双绞线</td>
+<td align="center">100米</td>
+</tr>
+</tbody></table>
+<ul>
+<li>屏蔽双绞线(Shielded Twisted Pair，STP)：双绞线与外层绝缘封套间，使用金属屏蔽层，屏蔽电磁干扰</li>
+<li>非屏蔽双绞线(Unshielded Twisted Pair, UTP)：无金属屏蔽层<ul>
+<li>3 类双绞线支持 10Mbps 传输速率</li>
+<li>5 类双绞线支持 100Mbps 传输速率</li>
+<li><strong>超 5 类</strong> 或更高级双绞线支持 <strong>千兆</strong> 传输速率</li>
+<li>双绞线使用 <strong>RJ-45 接头</strong> 连接网络设备，且接头针脚须按固定线序排列</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-3-3-光纤"><a href="#1-3-3-光纤" class="headerlink" title="1.3.3 光纤"></a>1.3.3 光纤</h3><table>
+<thead>
+<tr>
+<th align="center">以太网标准</th>
+<th align="center">线缆类别</th>
+<th align="center">最长有效传输距离</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">10BASE-F</td>
+<td align="center">单模/多模光纤</td>
+<td align="center">2000米</td>
+</tr>
+<tr>
+<td align="center">100BASE-FX</td>
+<td align="center">单模/多模光纤</td>
+<td align="center">2000米</td>
+</tr>
+<tr>
+<td align="center">1000BASE-LX</td>
+<td align="center">单模/多模光纤</td>
+<td align="center">316米</td>
+</tr>
+<tr>
+<td align="center">10000BASE-SX</td>
+<td align="center">多模光纤</td>
+<td align="center">316米</td>
+</tr>
+</tbody></table>
+<ul>
+<li>单模光纤：只传输一种模式的光，无色散损耗，适合长距离高速传输</li>
+<li>多模光纤：传输多种模式的光，色散较大，信号脉冲展宽严重，只能短距离传输</li>
+</ul>
+<h3 id="1-3-4-串口电缆"><a href="#1-3-4-串口电缆" class="headerlink" title="1.3.4 串口电缆"></a>1.3.4 串口电缆</h3><table>
+<thead>
+<tr>
+<th align="center">线缆类别</th>
+<th align="center">速率</th>
+<th align="center">串口电缆标准</th>
+<th align="center">传输距离</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">V.24</td>
+<td align="center">1.2Kbit/s~64Kbit/s</td>
+<td align="center">RS-232(DB-9、DB-25)</td>
+<td align="center">6米</td>
+</tr>
+<tr>
+<td align="center">V.35</td>
+<td align="center">1.2Kbit/s~2.048Mbit/s</td>
+<td align="center">RS-422、RS-484</td>
+<td align="center">1200米</td>
+</tr>
+</tbody></table>
+<ul>
+<li>目前 RS-232 逐渐被 FireWire 、 USB 等新标准取代</li>
+<li>新产品和设备普遍使用 USB 标准</li>
+</ul>
+<h2 id="1-4-冲突域、冲突检测"><a href="#1-4-冲突域、冲突检测" class="headerlink" title="1.4 冲突域、冲突检测"></a>1.4 冲突域、冲突检测</h2><ul>
+<li>多个主机使用同一根同轴电缆连接通信，该同轴电缆被称为共享介质，此网络称为共享介质网络。</li>
+<li>当网络中不同主机同时发送数据时，即产生信号冲突的问题</li>
+<li>一般是采用 <strong>载波侦听多路访问 / 冲突检测技术 (CSMA/CD)</strong><ul>
+<li>终端设备<strong>不停</strong>检测共享线路状态：若线路空闲，即发送数据；若线路繁忙，延时发送数据（延时时间由退避算法决定）<ol>
+<li>若存在两个或两个以上设备同时发送数据，线路发生数据冲突</li>
+<li>终端设备检查到冲突信号后，马上停止发送自己的数据，并发送阻塞信息，强化冲突信号，使其他站点尽快检测冲突</li>
+<li>终端设备检测到冲突信号后，延时等待一段时间后再进行数据发送（延时时间由退避算法决定）</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>CSMA/CD 的工作原理总结：<strong>先听先发，边听边发，冲突停发，随机延迟后重发</strong></li>
+</ul>
+<h2 id="1-5-通信模式"><a href="#1-5-通信模式" class="headerlink" title="1.5 通信模式"></a>1.5 通信模式</h2><ul>
+<li>设备工作模式<ul>
+<li>单工模式：设备只能收，或只能发</li>
+<li>半双工模式：设备能收，也能发，但同一时间只能收，或只能发</li>
+<li>全双工模式：设备能同时进行收、发</li>
+</ul>
+</li>
+<li>以太网工作模式<ul>
+<li>半双工模式：冲突域内设备必须采用 CSMA/CD 机制避免冲突</li>
+<li>全双工模式：该模式不会产生冲突</li>
+</ul>
+</li>
+<li>同一物理链上相连的两台设备双工模式必须一致</li>
+</ul>
+<h1 id="2-以太网帧"><a href="#2-以太网帧" class="headerlink" title="2 以太网帧"></a>2 以太网帧</h1><p>网络传输数据需要遵循标准，以太网根据 <strong>IEEE 802.3</strong> 标准管理和控制数据帧</p>
+<h2 id="2-1-网络通信协议种类"><a href="#2-1-网络通信协议种类" class="headerlink" title="2.1 网络通信协议种类"></a>2.1 网络通信协议种类</h2><table>
+<thead>
+<tr>
+<th align="center">OSI</th>
+<th align="center">TCP/IP</th>
+<th align="center">IPX/SPX</th>
+<th align="center">SNA</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">局域网</td>
+<td align="center">广域网</td>
+<td align="center">广域网</td>
+<td align="center">广域网</td>
+</tr>
+<tr>
+<td align="center">IEEE 802</td>
+<td align="center">以太网</td>
+<td align="center">PPP</td>
+<td align="center">HDLC</td>
+</tr>
+</tbody></table>
+<ul>
+<li>协议和标准两个词汇常常可以混用，且具有层次的特点</li>
+<li>通常，关注于逻辑数据关系的协议称为 <strong>上层协议</strong> ；关注于物理数据流的协议称为 <strong>底层协议</strong> <ul>
+<li><strong>IEEE 802</strong> 为一套管理物理数据流在局域网中传输的标准，包含在局域网中传输物理数据的 <strong>802.3</strong> 以太网标准</li>
+<li><strong>PPP(Point-to-Point Protocol)</strong> 为一套管理物理数据流在 <strong>广域网</strong> 的传输标准</li>
+<li><strong>HDLC(High-Level Data Link Control)</strong> 为一套管理物理数据流在 <strong>广域网</strong> 的传输标准</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-2-OSI七层模型"><a href="#2-2-OSI七层模型" class="headerlink" title="2.2 OSI七层模型"></a>2.2 OSI七层模型</h2><table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">应用层</td>
+<td align="left">为应用程序提供网络服务</td>
+</tr>
+<tr>
+<td align="center">表示层</td>
+<td align="left">数据格式化、加密、揭秘：提供各种用于应用层数据的编码和转换功能，确保系应用层发送的数据能够被另外的系统应用层识别</td>
+</tr>
+<tr>
+<td align="center">会话层</td>
+<td align="left">建立、维护、管理 <strong>会话连接</strong> ：该层的通信由不同设备中应用程序之间的服务请求和响应组成</td>
+</tr>
+<tr>
+<td align="center">传输层</td>
+<td align="left">建立、维护、管理 <strong>端到端连接</strong> ：提供面向连接(<strong>TCP</strong>)、非面向连接的数据传输(<strong>UDP</strong>)，并进行重传前的差错检测</td>
+</tr>
+<tr>
+<td align="center">网络层</td>
+<td align="left"><strong>IP寻址和路由选择</strong> ：提供逻辑地址，供路由器确定传输路径</td>
+</tr>
+<tr>
+<td align="center">数据链路层</td>
+<td align="left">控制网络层和物理层之间的通信：将比特组合成字节，将字节组合成帧，使用链路层地址访问介质，进行差错控制</td>
+</tr>
+<tr>
+<td align="center">物理层</td>
+<td align="left">设备之间传输比特流：规定电平、速度、电缆针脚</td>
+</tr>
+</tbody></table>
+<ul>
+<li>OSI分层模型优点：<ul>
+<li>简化相关网络操作</li>
+<li>提供不同厂商兼容性</li>
+<li>促进标准化工作</li>
+<li>结构上分层，易于学习和操作</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-3-TCP-IP分层模型"><a href="#2-3-TCP-IP分层模型" class="headerlink" title="2.3 TCP/IP分层模型"></a>2.3 TCP/IP分层模型</h2><table>
+<thead>
+<tr>
+<th align="center">层名称</th>
+<th align="center">数据集合名称</th>
+<th align="center">英文及简写</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">应用层</td>
+<td align="center">数据</td>
+<td align="center">PDU</td>
+</tr>
+<tr>
+<td align="center">传输层</td>
+<td align="center">数据段</td>
+<td align="center">Segment</td>
+</tr>
+<tr>
+<td align="center">网络层</td>
+<td align="center">数据包</td>
+<td align="center">Packet</td>
+</tr>
+<tr>
+<td align="center">网络结构层</td>
+<td align="center">数据帧、比特流</td>
+<td align="center">Frame、Bit</td>
+</tr>
+</tbody></table>
+<ul>
+<li>TCP/IP模型继承了OSI模型的分层结构，层与层相对独立，且具有密切的协作关系</li>
+<li>TCP/IP分四层模型不关注底层物理介质，主要关注终端间的逻辑转发问题，故TCP/IP核心为网络层、传输层：<ul>
+<li>网络层：解决网络之间的逻辑转发问题</li>
+<li>传输层：保证源端到目的端之间的可靠传输</li>
+</ul>
+</li>
+<li>数据 $\xrightarrow{TCP报头}$ 数据段 $\xrightarrow{IP报头}$ 数据包 $\xrightarrow{数据链路层报头}$ 数据帧 $\rightarrow$ 比特流</li>
+</ul>
+<h2 id="2-4-以太网常见数据帧格式"><a href="#2-4-以太网常见数据帧格式" class="headerlink" title="2.4 以太网常见数据帧格式"></a>2.4 以太网常见数据帧格式</h2><h3 id="2-4-1-Ethernet-II（以太网多用）"><a href="#2-4-1-Ethernet-II（以太网多用）" class="headerlink" title="2.4.1 Ethernet II（以太网多用）"></a>2.4.1 Ethernet II（以太网多用）</h3><table>
+<thead>
+<tr>
+<th align="center">D.MAC</th>
+<th align="center">S.MAC</th>
+<th align="center">Type</th>
+<th align="center">Data</th>
+<th align="center">FC5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">目的地址</td>
+<td align="center">源地址</td>
+<td align="center">类型</td>
+<td align="center">数据</td>
+<td align="center">循环冗余校验</td>
+</tr>
+<tr>
+<td align="center">6 Byte</td>
+<td align="center">6 Byte</td>
+<td align="center">2 Byte</td>
+<td align="center">46-1500 Byte</td>
+<td align="center">4 Byte</td>
+</tr>
+</tbody></table>
+<h3 id="2-4-2-IEEE-802-3"><a href="#2-4-2-IEEE-802-3" class="headerlink" title="2.4.2 IEEE 802.3"></a>2.4.2 IEEE 802.3</h3><table>
+<thead>
+<tr>
+<th align="center">D.MAC</th>
+<th align="center">S.MAC</th>
+<th align="center">Length</th>
+<th align="center">LLC</th>
+<th align="center">SNAP</th>
+<th align="center">Data</th>
+<th align="center">FC5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">目的地址</td>
+<td align="center">源地址</td>
+<td align="center">长度</td>
+<td align="center">逻辑链路控制</td>
+<td align="center">子网接入协议</td>
+<td align="center">数据</td>
+<td align="center">循环冗余校验</td>
+</tr>
+<tr>
+<td align="center">6 Byte</td>
+<td align="center">6 Byte</td>
+<td align="center">2 Byte</td>
+<td align="center">3 Byte</td>
+<td align="center">5 Byte</td>
+<td align="center">38-1492 Byte</td>
+<td align="center">4 Byte</td>
+</tr>
+</tbody></table>
+<h3 id="2-4-3-LLC与SNAP"><a href="#2-4-3-LLC与SNAP" class="headerlink" title="2.4.3 LLC与SNAP"></a>2.4.3 LLC与SNAP</h3><table>
+  <tr>
+    <th colspan="3">LLC:3 Byte</th>
+    <th colspan="2">SNAP:5 Byte</th>
+  </tr>
+  <tr>
+    <td>D.SAP</td>
+    <td>S.SAP</td>
+    <td>Control</td>
+    <td>Org Code</td>
+    <td>Type</td>
+  </tr>
+  <tr>
+    <td>目的服务访问点</td>
+    <td>源服务访问点</td>
+    <td>控制</td>
+    <td>机构代码</td>
+    <td>类型</td>
+  </tr>
+  <tr>
+    <td>3 Byte</td>
+    <td>1 Byte</td>
+    <td>1 Byte</td>
+    <td>3 Byte</td>
+    <td>2 Byte</td>
+  </tr>
+</table>
+
+
+
+<ul>
+<li>若 Length/Type &gt;= 1546(0x0600)，为 Ethernet II；若 Length/Type &lt;= 1500(0x05DC)，为 IEEE802.3</li>
+<li>循环冗余校验（FCS）提供错误检测机制，用于检验传输过程帧的完整性</li>
+<li>两种Type字段均用于标识数据字段高层协议：若Type=0x0800，则为IP协议帧；若Type=0x0806，则为ARP协议帧</li>
+<li>Org Code三个字节均为 0</li>
+<li>当 D.SAP 和 S.SAP 均取特定值 0xff时，802.3帧变为Netware-ETHERNET帧，用于承载NetWare类型数据</li>
+<li>当 D.SAP 和 S.SAP 均取特定值 0xaa 时，802.3帧变为ETHERNET_SNAP帧，用于传输多种协议</li>
+<li>当 D.SAP 和 S.SAP 其他取值时均为纯 IEEE 802.3帧</li>
+</ul>
+<h2 id="2-5-以太网的MAC地址"><a href="#2-5-以太网的MAC地址" class="headerlink" title="2.5 以太网的MAC地址"></a>2.5 以太网的MAC地址</h2><ul>
+<li>数据链路层基于MAC地址进行帧的传输，以太网在二层链路上通过MAC地址来唯一标示网络设备，并实现局域网上的通信</li>
+<li>MAC地址也叫做物理地址，大多数厂商直接将MAC地址烧入网卡的ROM中，通信发送端使用接收端的MAC地址作为目的地址</li>
+<li>MAC地址由两部分组成：</li>
+</ul>
+<table>
+  <tr>
+    <th colspan="2">48 bits</th>
+  </tr>
+  <tr>
+    <td>24 bits</td>
+    <td>24 bits</td>
+  </tr>
+  <tr>
+    <td>OUI(组织唯一标示符号)</td>
+    <td>由供应商分配</td>
+  </tr>
+</table>
+
+
+
+<ul>
+<li>网络设备的MAC地址是全球唯一的，长度为48比特，通常用16进制表示</li>
+<li>组织唯一标示符由IEEE统一分配给设备制造商，华为网络产品的MAC地址前24比特为0x00e0fc，后24位由厂商自行分配</li>
+<li>帧的发送方式：单播、广播、组播</li>
+</ul>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">CurryQi</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://curryqi/github.io/2020/04/05/1-%E4%BC%A0%E8%BE%93%E4%BB%8B%E8%B4%A8%E3%80%81%E5%B8%A7%E7%BB%93%E6%9E%84%E3%80%81IP%E5%9C%B0%E5%9D%80%E3%80%81ICMP%E5%8D%8F%E8%AE%AE%E3%80%81ARP%E5%8D%8F%E8%AE%AE%E3%80%81%E4%BC%A0%E8%BE%93%E5%B1%82%E5%8D%8F%E8%AE%AE%E5%8F%8A%E6%95%B0%E6%8D%AE%E8%BD%AC%E5%8F%91%E8%BF%87%E7%A8%8B/">https://curryqi/github.io/2020/04/05/1-%E4%BC%A0%E8%BE%93%E4%BB%8B%E8%B4%A8%E3%80%81%E5%B8%A7%E7%BB%93%E6%9E%84%E3%80%81IP%E5%9C%B0%E5%9D%80%E3%80%81ICMP%E5%8D%8F%E8%AE%AE%E3%80%81ARP%E5%8D%8F%E8%AE%AE%E3%80%81%E4%BC%A0%E8%BE%93%E5%B1%82%E5%8D%8F%E8%AE%AE%E5%8F%8A%E6%95%B0%E6%8D%AE%E8%BD%AC%E5%8F%91%E8%BF%87%E7%A8%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://curryqi/github.io" target="_blank">CurryQi's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/TCP-IP%E5%9F%BA%E7%A1%80/">TCP/IP基础</a></div><div class="post_share"><div class="social-share" data-image="/img/avatar.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/wechat.jpg" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/alipay.jpg" alt="支付寶"/><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2020/04/05/5-DHCP%E3%80%81FTP%E3%80%81Telnet/"><img class="prev_cover lazyload" data-src="/img/post.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">5 DHCP、FTP、Telnet</div></div></a></div><div class="next-post pull_right"><a href="/2020/04/05/hello-world/"><img class="next_cover lazyload" data-src="undefined" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Hello World</div></div></a></div></nav></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 By CurryQi</div><div class="framework-info"><span>驱动 </span><a href="https://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script></body></html>
