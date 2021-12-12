@@ -954,6 +954,10 @@ pre code {
     transform: translate(1pt, -2pt) rotate(-1deg);
   }
 }
+.mermaid {
+  margin-bottom: 20px;
+  text-align: center;
+}
 .post-body .note {
   border-radius: 3px;
   margin-bottom: 20px;
@@ -2868,7 +2872,7 @@ hr {
   transition: all 0.2s ease-in-out;
 }
 .links-of-author a::before {
-  background: #a1ffe8;
+  background: #b50aab;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
