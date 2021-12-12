@@ -220,7 +220,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2021-12-12 03:33:32" itemprop="dateModified" datetime="2021-12-12T03:33:32+08:00">2021-12-12</time>
+      <time title="修改时间：2021-12-12 14:56:40" itemprop="dateModified" datetime="2021-12-12T14:56:40+08:00">2021-12-12</time>
     </span>
 
   
@@ -265,14 +265,156 @@
 <li>事件注入：Monkey将事件流发送到系统中</li>
 <li>系统监控：应用崩溃、响应超时，Monkey会停止并报告错误</li>
 </ol>
-<h2 id="3-选项"><a href="#3-选项" class="headerlink" title="3. 选项"></a>3. 选项</h2><ul>
-<li>基本配置选项，例如设置要尝试的事件数</li>
-<li>操作限制条件，例如将测试对象限制为单个软件包</li>
-<li>注入事件类型和频率</li>
-<li>调试选项</li>
-</ul>
-<h2 id="4-文件结构"><a href="#4-文件结构" class="headerlink" title="4. 文件结构"></a>4. 文件结构</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">└── monkey</span><br><span class="line">    ├── Logger.java</span><br><span class="line">    ├── Monkey.java</span><br><span class="line">    ├── MonkeyActivityEvent.java</span><br><span class="line">    ├── MonkeyCommandEvent.java</span><br><span class="line">    ├── MonkeyEvent.java</span><br><span class="line">    ├── MonkeyEventQueue.java</span><br><span class="line">    ├── MonkeyEventSource.java</span><br><span class="line">    ├── MonkeyFlipEvent.java</span><br><span class="line">    ├── MonkeyGetAppFrameRateEvent.java</span><br><span class="line">    ├── MonkeyGetFrameRateEvent.java</span><br><span class="line">    ├── MonkeyInstrumentationEvent.java</span><br><span class="line">    ├── MonkeyKeyEvent.java</span><br><span class="line">    ├── MonkeyMotionEvent.java</span><br><span class="line">    ├── MonkeyNetworkMonitor.java</span><br><span class="line">    ├── MonkeyNoopEvent.java</span><br><span class="line">    ├── MonkeyPermissionEvent.java</span><br><span class="line">    ├── MonkeyPermissionUtil.java</span><br><span class="line">    ├── MonkeyPowerEvent.java</span><br><span class="line">    ├── MonkeyRotationEvent.java</span><br><span class="line">    ├── MonkeySourceNetwork.java</span><br><span class="line">    ├── MonkeySourceNetworkVars.java</span><br><span class="line">    ├── MonkeySourceNetworkViews.java</span><br><span class="line">    ├── MonkeySourceRandom.java</span><br><span class="line">    ├── MonkeySourceRandomScript.java</span><br><span class="line">    ├── MonkeySourceScript.java</span><br><span class="line">    ├── MonkeyThrottleEvent.java</span><br><span class="line">    ├── MonkeyTouchEvent.java</span><br><span class="line">    ├── MonkeyTrackballEvent.java</span><br><span class="line">    ├── MonkeyUtils.java</span><br><span class="line">    ├── MonkeyViewException.java</span><br><span class="line">    └── MonkeyWaitEvent.java</span><br></pre></td></tr></table></figure>
+<h2 id="3-选项"><a href="#3-选项" class="headerlink" title="3. 选项"></a>3. 选项</h2><p>基于Monkey命令行选项，分析功能和使用状况。</p>
+<table>
+  <tr>
+    <th bgcolor=#B0C4DE>类型</th>
+    <th bgcolor=#B0C4DE>选项</th>
+    <th bgcolor=#B0C4DE>功能</th>
+    <th bgcolor=#B0C4DE>使用</th>
+  </tr>
+  <tr>
+    <td rowspan="2">常规参数</td>
+    <td>--help</td>
+    <td>输出使用指南</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+      <td>-v</td>
+    <td>指定反馈信息级别，即日志详细程度，共三级，使用多级时，需要多次使用-v</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+      <td rowspan="11">事件</td>
+      <td>-s</td>
+    <td>指定伪随机数生成器的seed值，如果seed值相同，则两次monkey测试产生的事件序列也相同</td>
+      <td bgcolor=#FFD700>常用</td>
+  <tr>
+  </tr>
+      <td>--throttle</td>
+    <td>指定注入事件间的时延间隔，单位ms；如果未指定，则不延迟，系统会尽快地生成事件；常见为300ms</td>
+      <td bgcolor=#FFD700>常用</td>
+  <tr>
+    <td>--pct-touch</td>
+    <td>调整<span style="color:red">轻触事件</span>所占百分比（屏幕上单个位置上按下、释放事件）</td>
+      <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--pct-motion</td>
+    <td>调整<span style="color:red">动作事件</span>所占百分比（屏幕上某个位置按下、一系列伪随机直线移动动作、释放事件）</td>
+      <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--pct-trackball</td>
+    <td>调整<span style="color:red">轨迹球事件</span>所占百分比（一个或多个随机动作，有时会触发点击）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-nav</td>
+    <td>调整<span style="color:red">基本导航事件</span>所占百分比（输入设备的上、下、左、右作为方向）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-majornav</td>
+    <td>调整<span style="color:red">主要导航事件</span>所占百分比（5-way键盘的菜单键、中间键、回退键）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-syskeys</td>
+    <td>调整<span style="color:red">系统按键事件</span>所占百分比（预留系统使用：主屏幕、返回、发起通话、结束通话、音量控制，百分比较小）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-appswitch</td>
+    <td>调整Activity启动次数所占百分比（以最大限度覆盖软件包中所有Activity）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-anyevent</td>
+    <td>调整其他类型事件所占百分比（包括所有其他类型事件：按键、不常用按钮等，不常用）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td rowspan="2">约束</td>
+      <td>-p</td>
+    <td>指定一个或多个app包，不使用时默认允许启动所有app</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>-c</td>
+    <td>指定一个或多个类别，不使用时选择Intent.CATEGORY_LAUNCHER或Intent.GATEGORY_MONKEY类别所列的Activity</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td rowspan="8">调试</td>
+    <td>--dbg-no-events</td>
+    <td>将初始启动到测试Activity，但不会生成任何事件</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--hprof</td>
+    <td>在Monkey事件序列之前和之后立即生成分析报告，将在/data/misc下生成大型（约5M）文件</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--ignore-crashes</td>
+    <td>应用发生崩溃或异常时，Monkey将忽略并继续发事件给系统，直至事件计数结束</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--ignore-timeouts</td>
+    <td>应用程序发生超时错误时，Monkey将忽略并继续发事件给系统，直至事件计数结束</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--ignore-security-exceptions</td>
+    <td>应用程序发生权限错误导致异常时，Monkey将忽略并继续发事件给系统，直至事件计数结束</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--kill-process-after-error</td>
+    <td>当Monkey由于应用程序出错停止时，将通知系统停止发生错误的进程（PS：正常结束并不会停止已启动的进程，设备会停留在最后状态）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--monitor-native-crashes</td>
+    <td>监视并上报系统原生代码中发生的崩溃，可配合--kill-process-after-error选项使用</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--wait-dbg</td>
+    <td>阻止Monkey执行，直到为其连接了调试程序</td>
+    <td>不常用</td>
+  </tr>
+</table
 
+<h2 id="4-结构"><a href="#4-结构" class="headerlink" title="4. 结构"></a>4. 结构</h2><h3 id="4-1-文件结构"><a href="#4-1-文件结构" class="headerlink" title="4.1 文件结构"></a>4.1 文件结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">└── monkey</span><br><span class="line">    ├── Logger.java</span><br><span class="line">    ├── Monkey.java													<span class="comment"># Monkey入口</span></span><br><span class="line">    ├── MonkeyActivityEvent.java</span><br><span class="line">    ├── MonkeyCommandEvent.java</span><br><span class="line">    ├── MonkeyEvent.java										<span class="comment"># 事件基类</span></span><br><span class="line">    ├── MonkeyEventQueue.java</span><br><span class="line">    ├── MonkeyEventSource.java</span><br><span class="line">    ├── MonkeyFlipEvent.java</span><br><span class="line">    ├── MonkeyGetAppFrameRateEvent.java</span><br><span class="line">    ├── MonkeyGetFrameRateEvent.java</span><br><span class="line">    ├── MonkeyInstrumentationEvent.java</span><br><span class="line">    ├── MonkeyKeyEvent.java									<span class="comment"># 按键事件</span></span><br><span class="line">    ├── MonkeyMotionEvent.java							<span class="comment"># 滑动事件</span></span><br><span class="line">    ├── MonkeyNetworkMonitor.java</span><br><span class="line">    ├── MonkeyNoopEvent.java</span><br><span class="line">    ├── MonkeyPermissionEvent.java</span><br><span class="line">    ├── MonkeyPermissionUtil.java</span><br><span class="line">    ├── MonkeyPowerEvent.java</span><br><span class="line">    ├── MonkeyRotationEvent.java</span><br><span class="line">    ├── MonkeySourceNetwork.java</span><br><span class="line">    ├── MonkeySourceNetworkVars.java</span><br><span class="line">    ├── MonkeySourceNetworkViews.java</span><br><span class="line">    ├── MonkeySourceRandom.java</span><br><span class="line">    ├── MonkeySourceRandomScript.java</span><br><span class="line">    ├── MonkeySourceScript.java</span><br><span class="line">    ├── MonkeyThrottleEvent.java</span><br><span class="line">    ├── MonkeyTouchEvent.java								<span class="comment"># 触摸事件</span></span><br><span class="line">    ├── MonkeyTrackballEvent.java						<span class="comment"># 轨迹球事件</span></span><br><span class="line">    ├── MonkeyUtils.java</span><br><span class="line">    ├── MonkeyViewException.java</span><br><span class="line">    └── MonkeyWaitEvent.java</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-类结构"><a href="#4-2-类结构" class="headerlink" title="4.2 类结构"></a>4.2 类结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">classDiagram</span><br><span class="line">	class MonkeyEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyKeyEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyMotionEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyTouchEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyTrackballEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyRotationEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyActivityEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyFlipEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyThrottleEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyPermissionEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	class MonkeyNoopEvent&#123;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	MonkeyEvent &lt;-- MonkeyKeyEvent</span><br><span class="line">	MonkeyEvent &lt;-- MonkeyMotionEvent</span><br><span class="line">	MonkeyEvent &lt;-- MonkeyRotationEvent</span><br><span class="line">	MonkeyEvent &lt;-- MonkeyActivityEvent</span><br><span class="line">	MonkeyEvent &lt;-- MonkeyFlipEvent</span><br><span class="line">	MonkeyEvent &lt;-- MonkeyThrottleEvent</span><br><span class="line">	MonkeyEvent &lt;-- MonkeyPermissionEvent</span><br><span class="line">	MonkeyEvent &lt;-- MonkeyNoopEvent</span><br><span class="line">	MonkeyMotionEvent &lt;-- MonkeyTouchEvent</span><br><span class="line">	MonkeyMotionEvent &lt;-- MonkeyTrackballEvent</span><br></pre></td></tr></table></figure>
+
+<p>MonkeyEvent基类中定义:</p>
+<blockquote>
+<ol>
+<li>参数定义</li>
+</ol>
+<ul>
+<li><p>9种事件类型参数：Key事件、Touch事件、Trackball事件、Rotation事件、Activity事件、Flip事件、Throttle事件、Permission事件、Noop事件</p>
+</li>
+<li><p>4中执行结果：</p>
+<ul>
+<li>正常执行：Success、Fail</li>
+<li>异常返回：Remote Exception、Security Exception</li>
+</ul>
+</li>
+</ul>
+<ol start="2">
+<li>方法定义</li>
+</ol>
+<ul>
+<li><code>injectEvent(IWindowManager iwm, IActivityManager iam, int verbose)</code>：依赖WMS、AMS，进行事件注入</li>
+<li><code>isThrottlable()</code>：判断事件是否需要做延迟</li>
+<li><code>getEventType()</code>:获取当前事件类型</li>
+</ul>
+</blockquote>
 <h2 id="5-代码统计"><a href="#5-代码统计" class="headerlink" title="5. 代码统计"></a>5. 代码统计</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Language                     files          blank        comment           code</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">Java                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">SUM:                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
 
 
