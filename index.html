@@ -315,7 +315,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-12-12 16:51:40 / 修改时间：22:00:27" itemprop="dateCreated datePublished" datetime="2021-12-12T16:51:40+08:00">2021-12-12</time>
+      <time title="创建时间：2021-12-12 16:51:40 / 修改时间：22:03:58" itemprop="dateCreated datePublished" datetime="2021-12-12T16:51:40+08:00">2021-12-12</time>
     </span>
 
   
@@ -325,7 +325,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.8k</span>
+      <span>2.9k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -351,62 +351,55 @@
     mNetworkMonitor --> MonkeyNetworkMonitor
     MonkeyNetworkMonitor --> android.content.IIntentReceiver[依赖 Android.content.IIntentReceiver]</pre>
 
-<h2 id="2-Monkey-java核心流程解析"><a href="#2-Monkey-java核心流程解析" class="headerlink" title="2. Monkey.java核心流程解析"></a>2. Monkey.java核心流程解析</h2><pre class="mermaid">graph TD    
-  Monkey.main[入口 main] --> Android.os.Process.setArgV0(依赖 Android.os.Process)
-  Monkey.main --> Monkey.run[运行 run]
-  Monkey.run --> Monkey.args_debug[是否含有debug参数]
-  Monkey.args_debug --true--> Android.os.Debug[依赖 Android.os.Debug]
-  Monkey.args_debug --false--> Monkey.processOptions[是否正确解析参数 processOptions]
-  
-  Android.os.Debug --> Monkey.processOptions
-  
-  Monkey.processOptions --true--> Monkey.loadPackageLists[是否正确加载包列表 loadPackageLists]
-  Monkey.processOptions --false--> Monkey.Return[Monkey.Return:-1,-2,-3,-4]
+<ol start="2">
+<li><h2 id="Monkey-java核心流程解析"><a href="#Monkey-java核心流程解析" class="headerlink" title="Monkey.java核心流程解析"></a>Monkey.java核心流程解析</h2><pre class="mermaid">graph TD    
+Monkey.main[入口 main] --> Android.os.Process.setArgV0(依赖 Android.os.Process)
+Monkey.main --> Monkey.run[运行 run]
+Monkey.run --> Monkey.args_debug[是否含有debug参数]
+Monkey.args_debug --true--> Android.os.Debug[依赖 Android.os.Debug]
+Monkey.args_debug --false--> Monkey.processOptions[是否正确解析参数 processOptions]</li>
+</ol>
+<p>  Android.os.Debug –&gt; Monkey.processOptions</p>
+<p>  Monkey.processOptions –true–&gt; Monkey.loadPackageLists[是否正确加载包列表 loadPackageLists]<br>  Monkey.processOptions –false–&gt; Monkey.Return[Monkey.Return:-1,-2,-3,-4]</p>
+<pre><code>Monkey.loadPackageLists --true--&gt; Monkey.mMainCategories_0[是否指定类别 mMainCategories==0]
+</code></pre>
+<p>  Monkey.loadPackageLists –false–&gt; Monkey.Return</p>
+<p>  Monkey.mMainCategories_0 –true–&gt; Monkey.mSeed_0[是否指定随机种子 Monkey.mSeed==0]<br>  Monkey.mMainCategories_0 –false–&gt; Monkey.mMainCategories.add[加载默认类别 Monkey.mMainCategories.add]</p>
+<p>  Monkey.mMainCategories.add –&gt; Monkey.mSeed_0</p>
+<pre><code>Monkey.mSeed_0 --true--&gt; System.currentTimeMillis[依赖Java原生库生成随机种子 System.currentTimeMillis]
 
-    Monkey.loadPackageLists --true--> Monkey.mMainCategories_0[是否指定类别 mMainCategories==0]
-  Monkey.loadPackageLists --false--> Monkey.Return
-  
-  Monkey.mMainCategories_0 --true--> Monkey.mSeed_0[是否指定随机种子 Monkey.mSeed==0]
-  Monkey.mMainCategories_0 --false--> Monkey.mMainCategories.add[加载默认类别 Monkey.mMainCategories.add]
-  
-  Monkey.mMainCategories.add --> Monkey.mSeed_0
-  
-    Monkey.mSeed_0 --true--> System.currentTimeMillis[依赖Java原生库生成随机种子 System.currentTimeMillis]
-    
-    checkInternalConfiguration[待分析 checkInternalConfiguration]
-    checkInternalConfiguration --false--> Monkey.Return
-    
-    System.currentTimeMillis --> Monkey.getSystemInterfaces[获取系统所有接口 Monkey.getSystemInterfaces]
-    
-    Monkey.getSystemInterfaces --false--> Monkey.Return
-    Monkey.getSystemInterfaces --true--> Monkey.getMainApps[是否获得主要的APPs Monkey.getMainApps]
-    
-    Monkey.getMainApps --true--> java.util.Random[依靠java原生库创建随机数生成器 java.util.Random]
-    Monkey.getMainApps --false--> Monkey.Return
-    
-    java.util.Random --> mScriptFileNames_size_1[是否执行单一脚本模式 mScriptFileNames.size == 1]
+checkInternalConfiguration[待分析 checkInternalConfiguration]
+checkInternalConfiguration --false--&gt; Monkey.Return
 
-    mScriptFileNames_size_1 --true--> MonkeySourceScript[单个脚本 MonkeySourceScript]
-    mScriptFileNames_size_1 --false--> Monkey.mScriptFileNames_size_n[是否执行多个脚本模式 Monkey.mScriptFileNames.size > 1]
-    
-    Monkey.mScriptFileNames_size_n --true--> MonkeySourceRandomScript[随机执行脚本 MonkeySourceRandomScript]
-    Monkey.mScriptFileNames_size_n --false--> Monkey.mServerPort[是否联网执行脚本 mServerPort != -1]
-    
-    Monkey.mServerPort --true--> MonkeySourceNetwork[从网络中获取命令执行脚本 MonkeySourceNetwork]
-    Monkey.mServerPort --false--> MonkeySourceRandom[本地随机生成事件执行 MonkeySourceRandom]
-    
-    MonkeySourceRandom --> mEventSource.validate[验证随机生成事件是否可执行 mEventSource.validate]
-    MonkeySourceNetwork --> mEventSource.validate
-    MonkeySourceRandomScript --> mEventSource.validate
-    MonkeySourceScript --> mEventSource.validate
-    
-    mEventSource.validate --> mGenerateHprof[是否生成分析报告 mGenerateHprof]
-    
-    mGenerateHprof --true--> Monkey.mAm.signalPersistentProcesses[应用报告同步打印 Monkey.mAm.signalPersistentProcesses]
-    mGenerateHprof --false--> Monkey.mAm.signalPersistentProcesses</pre>
+System.currentTimeMillis --&gt; Monkey.getSystemInterfaces[获取系统所有接口 Monkey.getSystemInterfaces]
 
+Monkey.getSystemInterfaces --false--&gt; Monkey.Return
+Monkey.getSystemInterfaces --true--&gt; Monkey.getMainApps[是否获得主要的APPs Monkey.getMainApps]
 
+Monkey.getMainApps --true--&gt; java.util.Random[依靠java原生库创建随机数生成器 java.util.Random]
+Monkey.getMainApps --false--&gt; Monkey.Return
 
+java.util.Random --&gt; mScriptFileNames_size_1[是否执行单一脚本模式 mScriptFileNames.size == 1]
+
+mScriptFileNames_size_1 --true--&gt; MonkeySourceScript[单个脚本 MonkeySourceScript]
+mScriptFileNames_size_1 --false--&gt; Monkey.mScriptFileNames_size_n[是否执行多个脚本模式 Monkey.mScriptFileNames.size &gt; 1]
+
+Monkey.mScriptFileNames_size_n --true--&gt; MonkeySourceRandomScript[随机执行脚本 MonkeySourceRandomScript]
+Monkey.mScriptFileNames_size_n --false--&gt; Monkey.mServerPort[是否联网执行脚本 mServerPort != -1]
+
+Monkey.mServerPort --true--&gt; MonkeySourceNetwork[从网络中获取命令执行脚本 MonkeySourceNetwork]
+Monkey.mServerPort --false--&gt; MonkeySourceRandom[本地随机生成事件执行 MonkeySourceRandom]
+
+MonkeySourceRandom --&gt; mEventSource.validate[验证随机生成事件是否可执行 mEventSource.validate]
+MonkeySourceNetwork --&gt; mEventSource.validate
+MonkeySourceRandomScript --&gt; mEventSource.validate
+MonkeySourceScript --&gt; mEventSource.validate
+
+mEventSource.validate --&gt; mGenerateHprof[是否生成分析报告 mGenerateHprof]
+
+mGenerateHprof --true--&gt; Monkey.mAm.signalPersistentProcesses[应用报告同步打印 Monkey.mAm.signalPersistentProcesses]
+mGenerateHprof --false--&gt; Monkey.mAm.signalPersistentProcesses&lt;/pre&gt;
+</code></pre>
 
       
     </div>
@@ -464,7 +457,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2021-12-12 16:54:46" itemprop="dateModified" datetime="2021-12-12T16:54:46+08:00">2021-12-12</time>
+      <time title="修改时间：2021-12-12 22:04:07" itemprop="dateModified" datetime="2021-12-12T22:04:07+08:00">2021-12-12</time>
     </span>
 
   
