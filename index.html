@@ -84,9 +84,9 @@
   <ul class="main-menu menu">
         <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
         <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
-        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">0</span></a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">1</span></a></li>
         <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">0</span></a></li>
-        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">1</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">3</span></a></li>
         <li class="menu-item menu-item-schedule"><a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a></li>
         <li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li>
   </ul>
@@ -131,9 +131,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
       </div>
   </nav>
 </div>
@@ -188,6 +192,247 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CurryQi">
+      <meta itemprop="description" content="C‘est la vie">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CurryQi's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/" class="post-title-link" itemprop="url">Android-Monkey解析（三）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-12-12 21:51:55 / 修改时间：22:00:22" itemprop="dateCreated datePublished" datetime="2021-12-12T21:51:55+08:00">2021-12-12</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Android-Monkey详细分解"><a href="#Android-Monkey详细分解" class="headerlink" title="Android-Monkey详细分解"></a>Android-Monkey详细分解</h1><h2 id="1-MonkeyNetworkMonitor-java核心依赖分析"><a href="#1-MonkeyNetworkMonitor-java核心依赖分析" class="headerlink" title="1. MonkeyNetworkMonitor.java核心依赖分析"></a>1. MonkeyNetworkMonitor.java核心依赖分析</h2><pre class="mermaid">graph LR
+    
+    
+    MonkeyNetworkMonitor.performReceive --> android.content.Intent[依赖 Android.content.Intent]
+    MonkeyNetworkMonitor.performReceive --> android.os.Bundle[依赖 Android.os.Bundle]
+    MonkeyNetworkMonitor.performReceive --> android.net.NetworkInfo[依赖 Android.net.NetworkInfo]
+
+    MonkeyNetworkMonitor.performReceive & MonkeyNetworkMonitor.register&unregister --> android.os.RemoteException[依赖 Android.os.RemoteException]
+    
+    MonkeyNetworkMonitor.updateNetworkStats & MonkeyNetworkMonitor.filter --> android.content.ConnectivityManager[依赖 Android.content.ConnectivityManager]
+    MonkeyNetworkMonitor.performReceive & MonkeyNetworkMonitor.updateNetworkStats & MonkeyNetworkMonitor.start --> android.os.SystemClock[依赖 Android.os.SystemClock]
+    
+    MonkeyNetworkMonitor.register&unregister --> android.app.IActivityManager[依赖 Android.app.IActivityManager]
+    MonkeyNetworkMonitor.register&unregister --> android.os.UserHandle[依赖 Android.os.UserHandle]
+    
+    MonkeyNetworkMonitor.filter --> android.content.IntentFilter[依赖 Android.content.IntentFilter]
+    
+    MonkeyNetworkMonitor.stop --> MonkeyNetworkMonitor.updateNetworkStats
+    MonkeyNetworkMonitor.dump</pre>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CurryQi">
+      <meta itemprop="description" content="C‘est la vie">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CurryQi's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89/" class="post-title-link" itemprop="url">Android-Monkey解析（二）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-12-12 16:51:40 / 修改时间：22:00:27" itemprop="dateCreated datePublished" datetime="2021-12-12T16:51:40+08:00">2021-12-12</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Android-Monkey详细分解"><a href="#Android-Monkey详细分解" class="headerlink" title="Android-Monkey详细分解"></a>Android-Monkey详细分解</h1><h2 id="1-Monkey-java-核心实例、类"><a href="#1-Monkey-java-核心实例、类" class="headerlink" title="1. Monkey.java 核心实例、类"></a>1. Monkey.java 核心实例、类</h2><pre class="mermaid">graph TD
+  mAm --> android.app.IActivityManager[依赖 Android.app.IActivityManager]
+    mWm --> android.view.IWindowManager[依赖 Android.view.IWindowManager]
+    mPm --> android.content.pm.IPackageManager[依赖 Android.content.pm.IPackageManager]
+    mEventSource --> MonkeyEventSource
+    mNetworkMonitor --> MonkeyNetworkMonitor
+    MonkeyNetworkMonitor --> android.content.IIntentReceiver[依赖 Android.content.IIntentReceiver]</pre>
+
+<h2 id="2-Monkey-java核心流程解析"><a href="#2-Monkey-java核心流程解析" class="headerlink" title="2. Monkey.java核心流程解析"></a>2. Monkey.java核心流程解析</h2><pre class="mermaid">graph TD    
+  Monkey.main[入口 main] --> Android.os.Process.setArgV0(依赖 Android.os.Process)
+  Monkey.main --> Monkey.run[运行 run]
+  Monkey.run --> Monkey.args_debug[是否含有debug参数]
+  Monkey.args_debug --true--> Android.os.Debug[依赖 Android.os.Debug]
+  Monkey.args_debug --false--> Monkey.processOptions[是否正确解析参数 processOptions]
+  
+  Android.os.Debug --> Monkey.processOptions
+  
+  Monkey.processOptions --true--> Monkey.loadPackageLists[是否正确加载包列表 loadPackageLists]
+  Monkey.processOptions --false--> Monkey.Return[Monkey.Return:-1,-2,-3,-4]
+
+    Monkey.loadPackageLists --true--> Monkey.mMainCategories_0[是否指定类别 mMainCategories==0]
+  Monkey.loadPackageLists --false--> Monkey.Return
+  
+  Monkey.mMainCategories_0 --true--> Monkey.mSeed_0[是否指定随机种子 Monkey.mSeed==0]
+  Monkey.mMainCategories_0 --false--> Monkey.mMainCategories.add[加载默认类别 Monkey.mMainCategories.add]
+  
+  Monkey.mMainCategories.add --> Monkey.mSeed_0
+  
+    Monkey.mSeed_0 --true--> System.currentTimeMillis[依赖Java原生库生成随机种子 System.currentTimeMillis]
+    
+    checkInternalConfiguration[待分析 checkInternalConfiguration]
+    checkInternalConfiguration --false--> Monkey.Return
+    
+    System.currentTimeMillis --> Monkey.getSystemInterfaces[获取系统所有接口 Monkey.getSystemInterfaces]
+    
+    Monkey.getSystemInterfaces --false--> Monkey.Return
+    Monkey.getSystemInterfaces --true--> Monkey.getMainApps[是否获得主要的APPs Monkey.getMainApps]
+    
+    Monkey.getMainApps --true--> java.util.Random[依靠java原生库创建随机数生成器 java.util.Random]
+    Monkey.getMainApps --false--> Monkey.Return
+    
+    java.util.Random --> mScriptFileNames_size_1[是否执行单一脚本模式 mScriptFileNames.size == 1]
+
+    mScriptFileNames_size_1 --true--> MonkeySourceScript[单个脚本 MonkeySourceScript]
+    mScriptFileNames_size_1 --false--> Monkey.mScriptFileNames_size_n[是否执行多个脚本模式 Monkey.mScriptFileNames.size > 1]
+    
+    Monkey.mScriptFileNames_size_n --true--> MonkeySourceRandomScript[随机执行脚本 MonkeySourceRandomScript]
+    Monkey.mScriptFileNames_size_n --false--> Monkey.mServerPort[是否联网执行脚本 mServerPort != -1]
+    
+    Monkey.mServerPort --true--> MonkeySourceNetwork[从网络中获取命令执行脚本 MonkeySourceNetwork]
+    Monkey.mServerPort --false--> MonkeySourceRandom[本地随机生成事件执行 MonkeySourceRandom]
+    
+    MonkeySourceRandom --> mEventSource.validate[验证随机生成事件是否可执行 mEventSource.validate]
+    MonkeySourceNetwork --> mEventSource.validate
+    MonkeySourceRandomScript --> mEventSource.validate
+    MonkeySourceScript --> mEventSource.validate
+    
+    mEventSource.validate --> mGenerateHprof[是否生成分析报告 mGenerateHprof]
+    
+    mGenerateHprof --true--> Monkey.mAm.signalPersistentProcesses[应用报告同步打印 Monkey.mAm.signalPersistentProcesses]
+    mGenerateHprof --false--> Monkey.mAm.signalPersistentProcesses</pre>
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/11/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -212,14 +457,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2021-12-11 01:33:57" itemprop="dateCreated datePublished" datetime="2021-12-11T01:33:57+08:00">2021-12-11</time>
+      <time title="创建时间：2021-12-11 20:51:40" itemprop="dateCreated datePublished" datetime="2021-12-11T20:51:40+08:00">2021-12-11</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2021-12-12 16:33:03" itemprop="dateModified" datetime="2021-12-12T16:33:03+08:00">2021-12-12</time>
+      <time title="修改时间：2021-12-12 16:54:46" itemprop="dateModified" datetime="2021-12-12T16:54:46+08:00">2021-12-12</time>
     </span>
 
   
@@ -408,9 +653,9 @@
 </table
 
 
-<h2 id="4-结构"><a href="#4-结构" class="headerlink" title="4. 结构"></a>4. 结构</h2><h3 id="4-1-文件结构"><a href="#4-1-文件结构" class="headerlink" title="4.1 文件结构"></a>4.1 文件结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">└── monkey</span><br><span class="line">    ├── Logger.java</span><br><span class="line">    ├── Monkey.java													<span class="comment"># Monkey入口</span></span><br><span class="line">    ├── MonkeyActivityEvent.java</span><br><span class="line">    ├── MonkeyCommandEvent.java</span><br><span class="line">    ├── MonkeyEvent.java										<span class="comment"># 事件基类</span></span><br><span class="line">    ├── MonkeyEventQueue.java</span><br><span class="line">    ├── MonkeyEventSource.java</span><br><span class="line">    ├── MonkeyFlipEvent.java</span><br><span class="line">    ├── MonkeyGetAppFrameRateEvent.java</span><br><span class="line">    ├── MonkeyGetFrameRateEvent.java</span><br><span class="line">    ├── MonkeyInstrumentationEvent.java</span><br><span class="line">    ├── MonkeyKeyEvent.java									<span class="comment"># 按键事件</span></span><br><span class="line">    ├── MonkeyMotionEvent.java							<span class="comment"># 滑动事件</span></span><br><span class="line">    ├── MonkeyNetworkMonitor.java</span><br><span class="line">    ├── MonkeyNoopEvent.java</span><br><span class="line">    ├── MonkeyPermissionEvent.java</span><br><span class="line">    ├── MonkeyPermissionUtil.java</span><br><span class="line">    ├── MonkeyPowerEvent.java</span><br><span class="line">    ├── MonkeyRotationEvent.java</span><br><span class="line">    ├── MonkeySourceNetwork.java</span><br><span class="line">    ├── MonkeySourceNetworkVars.java</span><br><span class="line">    ├── MonkeySourceNetworkViews.java</span><br><span class="line">    ├── MonkeySourceRandom.java</span><br><span class="line">    ├── MonkeySourceRandomScript.java</span><br><span class="line">    ├── MonkeySourceScript.java</span><br><span class="line">    ├── MonkeyThrottleEvent.java</span><br><span class="line">    ├── MonkeyTouchEvent.java								<span class="comment"># 触摸事件</span></span><br><span class="line">    ├── MonkeyTrackballEvent.java						<span class="comment"># 轨迹球事件</span></span><br><span class="line">    ├── MonkeyUtils.java</span><br><span class="line">    ├── MonkeyViewException.java</span><br><span class="line">    └── MonkeyWaitEvent.java</span><br></pre></td></tr></table></figure>
+<h2 id="4-结构"><a href="#4-结构" class="headerlink" title="4. 结构"></a>4. 结构</h2><h3 id="4-1-文件结构"><a href="#4-1-文件结构" class="headerlink" title="4.1 文件结构"></a>4.1 文件结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">└── monkey</span><br><span class="line">    ├── Logger.java</span><br><span class="line">    ├── Monkey.java</span><br><span class="line">    ├── MonkeyActivityEvent.java</span><br><span class="line">    ├── MonkeyCommandEvent.java</span><br><span class="line">    ├── MonkeyEvent.java</span><br><span class="line">    ├── MonkeyEventQueue.java</span><br><span class="line">    ├── MonkeyEventSource.java</span><br><span class="line">    ├── MonkeyFlipEvent.java</span><br><span class="line">    ├── MonkeyGetAppFrameRateEvent.java</span><br><span class="line">    ├── MonkeyGetFrameRateEvent.java</span><br><span class="line">    ├── MonkeyInstrumentationEvent.java</span><br><span class="line">    ├── MonkeyKeyEvent.java</span><br><span class="line">    ├── MonkeyMotionEvent.java</span><br><span class="line">    ├── MonkeyNetworkMonitor.java</span><br><span class="line">    ├── MonkeyNoopEvent.java</span><br><span class="line">    ├── MonkeyPermissionEvent.java</span><br><span class="line">    ├── MonkeyPermissionUtil.java</span><br><span class="line">    ├── MonkeyPowerEvent.java</span><br><span class="line">    ├── MonkeyRotationEvent.java</span><br><span class="line">    ├── MonkeySourceNetwork.java</span><br><span class="line">    ├── MonkeySourceNetworkVars.java</span><br><span class="line">    ├── MonkeySourceNetworkViews.java</span><br><span class="line">    ├── MonkeySourceRandom.java</span><br><span class="line">    ├── MonkeySourceRandomScript.java</span><br><span class="line">    ├── MonkeySourceScript.java</span><br><span class="line">    ├── MonkeyThrottleEvent.java</span><br><span class="line">    ├── MonkeyTouchEvent.java</span><br><span class="line">    ├── MonkeyTrackballEvent.java</span><br><span class="line">    ├── MonkeyUtils.java</span><br><span class="line">    ├── MonkeyViewException.java</span><br><span class="line">    └── MonkeyWaitEvent.java</span><br></pre></td></tr></table></figure>
 
-<h3 id="4-2-类结构"><a href="#4-2-类结构" class="headerlink" title="4.2 类结构"></a>4.2 类结构</h3><pre class="mermaid">classDiagram
+<h3 id="4-2-事件类型"><a href="#4-2-事件类型" class="headerlink" title="4.2 事件类型"></a>4.2 事件类型</h3><pre class="mermaid">classDiagram
     class MonkeyEvent{
     }
     class MonkeyKeyEvent{
@@ -461,12 +706,12 @@
 <li>3种方法：<ul>
 <li><code>injectEvent(IWindowManager iwm, IActivityManager iam, int verbose)</code>：依赖WMS、AMS，进行事件注入</li>
 <li><code>isThrottlable()</code>：判断事件是否需要做延迟</li>
-<li><code>getEventType()</code>:获取当前事件类型</li>
+<li><code>getEventType()</code>：获取当前事件类型</li>
 </ul>
 </li>
 </ul>
 </blockquote>
-<h2 id="5-代码统计"><a href="#5-代码统计" class="headerlink" title="5. 代码统计"></a>5. 代码统计</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Language                     files          blank        comment           code</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">Java                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">SUM:                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<h3 id="4-3-事件"><a href="#4-3-事件" class="headerlink" title="4.3 事件"></a>4.3 事件</h3><h2 id="5-代码统计"><a href="#5-代码统计" class="headerlink" title="5. 代码统计"></a>5. 代码统计</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Language                     files          blank        comment           code</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">Java                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">SUM:                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
 
 
       
@@ -508,14 +753,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">2k</span>
+    <span title="站点总字数">6k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">2 分钟</span>
+    <span title="站点阅读时长">5 分钟</span>
   </span>
 </div>
 
