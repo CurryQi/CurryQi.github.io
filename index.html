@@ -189,7 +189,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/11/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/11/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -202,7 +202,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/12/11/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
+          <a href="/2021/12/11/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89/" class="post-title-link" itemprop="url">Android-Monkey解析（一）</a>
         </h2>
 
         <div class="post-meta-container">
@@ -215,6 +215,13 @@
 
       <time title="创建时间：2021-12-11 01:33:57" itemprop="dateCreated datePublished" datetime="2021-12-11T01:33:57+08:00">2021-12-11</time>
     </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2021-12-12 03:33:32" itemprop="dateModified" datetime="2021-12-12T03:33:32+08:00">2021-12-12</time>
+    </span>
 
   
     <span class="post-meta-break"></span>
@@ -223,7 +230,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>367</span>
+      <span>1.5k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -241,19 +248,33 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+          <h1 id="Android-Monkey概要分析"><a href="#Android-Monkey概要分析" class="headerlink" title="Android-Monkey概要分析"></a>Android-Monkey概要分析</h1><h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h2><ul>
+<li><p>形式：命令行工具</p>
+</li>
+<li><p>本质：Monkey是一个模拟器、设备上运行的程序</p>
+</li>
+<li><p>用途：对开发的应用作压力测试</p>
+</li>
+<li><p>基本语法</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell monkey [options] &lt;event-count&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>具体实例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell monkey -p your.package.name -v 500</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="2-能力"><a href="#2-能力" class="headerlink" title="2. 能力"></a>2. 能力</h2><ol>
+<li>事件生成：Monkey可生成伪随机用户事件流（譬如轻触、点击、手势）和很多系统级事件</li>
+<li>事件注入：Monkey将事件流发送到系统中</li>
+<li>系统监控：应用崩溃、响应超时，Monkey会停止并报告错误</li>
+</ol>
+<h2 id="3-选项"><a href="#3-选项" class="headerlink" title="3. 选项"></a>3. 选项</h2><ul>
+<li>基本配置选项，例如设置要尝试的事件数</li>
+<li>操作限制条件，例如将测试对象限制为单个软件包</li>
+<li>注入事件类型和频率</li>
+<li>调试选项</li>
+</ul>
+<h2 id="4-文件结构"><a href="#4-文件结构" class="headerlink" title="4. 文件结构"></a>4. 文件结构</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">└── monkey</span><br><span class="line">    ├── Logger.java</span><br><span class="line">    ├── Monkey.java</span><br><span class="line">    ├── MonkeyActivityEvent.java</span><br><span class="line">    ├── MonkeyCommandEvent.java</span><br><span class="line">    ├── MonkeyEvent.java</span><br><span class="line">    ├── MonkeyEventQueue.java</span><br><span class="line">    ├── MonkeyEventSource.java</span><br><span class="line">    ├── MonkeyFlipEvent.java</span><br><span class="line">    ├── MonkeyGetAppFrameRateEvent.java</span><br><span class="line">    ├── MonkeyGetFrameRateEvent.java</span><br><span class="line">    ├── MonkeyInstrumentationEvent.java</span><br><span class="line">    ├── MonkeyKeyEvent.java</span><br><span class="line">    ├── MonkeyMotionEvent.java</span><br><span class="line">    ├── MonkeyNetworkMonitor.java</span><br><span class="line">    ├── MonkeyNoopEvent.java</span><br><span class="line">    ├── MonkeyPermissionEvent.java</span><br><span class="line">    ├── MonkeyPermissionUtil.java</span><br><span class="line">    ├── MonkeyPowerEvent.java</span><br><span class="line">    ├── MonkeyRotationEvent.java</span><br><span class="line">    ├── MonkeySourceNetwork.java</span><br><span class="line">    ├── MonkeySourceNetworkVars.java</span><br><span class="line">    ├── MonkeySourceNetworkViews.java</span><br><span class="line">    ├── MonkeySourceRandom.java</span><br><span class="line">    ├── MonkeySourceRandomScript.java</span><br><span class="line">    ├── MonkeySourceScript.java</span><br><span class="line">    ├── MonkeyThrottleEvent.java</span><br><span class="line">    ├── MonkeyTouchEvent.java</span><br><span class="line">    ├── MonkeyTrackballEvent.java</span><br><span class="line">    ├── MonkeyUtils.java</span><br><span class="line">    ├── MonkeyViewException.java</span><br><span class="line">    └── MonkeyWaitEvent.java</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<h2 id="5-代码统计"><a href="#5-代码统计" class="headerlink" title="5. 代码统计"></a>5. 代码统计</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Language                     files          blank        comment           code</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">Java                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">SUM:                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 
       
     </div>
@@ -294,7 +315,7 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">0k</span>
+    <span title="站点总字数">1k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
