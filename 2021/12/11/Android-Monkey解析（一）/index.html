@@ -28,7 +28,7 @@
 <meta property="og:description" content="Android-Monkey概要分析1. 简介 形式：命令行工具 本质：Monkey是一个模拟器、设备上运行的程序 用途：对开发的应用作压力测 基本语法1adb shell monkey [options] &lt;event-count&gt; 具体实例1adb shell monkey -p your.package.name -v 500  2. 能力 事件生成：Monkey可生成伪随机用户">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-12-11T12:51:40.000Z">
-<meta property="article:modified_time" content="2021-12-12T14:04:07.662Z">
+<meta property="article:modified_time" content="2021-12-12T15:26:37.944Z">
 <meta property="article:author" content="CurryQi">
 <meta property="article:tag" content="Android">
 <meta name="twitter:card" content="summary">
@@ -228,7 +228,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2021-12-12 22:04:07" itemprop="dateModified" datetime="2021-12-12T22:04:07+08:00">2021-12-12</time>
+      <time title="修改时间：2021-12-12 23:26:37" itemprop="dateModified" datetime="2021-12-12T23:26:37+08:00">2021-12-12</time>
     </span>
 
   
@@ -238,7 +238,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.7k</span>
+      <span>1.8k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -363,7 +363,7 @@
     <td>不常用</td>
   </tr>
   <tr>
-    <td rowspan="8">调试</td>
+    <td rowspan="9">调试</td>
     <td>--dbg-no-events</td>
     <td>将初始启动到测试Activity，但不会生成任何事件</td>
     <td>不常用</td>
@@ -404,6 +404,32 @@
     <td>不常用</td>
   </tr>
   <tr>
+    <td>COUNT</td>
+    <td>次数</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td rowspan="4">脚本</td>
+    <td>-setup</td>
+    <td>执行单个脚本</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>-f</td>
+    <td>多次调用，执行多个脚本</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--port</td>
+    <td>连接服务器，执行TCP从连接服务器中获取的Monkey脚本</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--randomize-script</td>
+    <td>执行随机Monkey脚本，需要和-f一起使用</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
     <td rowspan="2">名单</td>
     <td>--pkg-blacklist-file</td>
     <td>白名单列表</td>
@@ -415,6 +441,7 @@
     <td>不常用</td>
   </tr>
 </table
+
 
 
 <h2 id="4-结构"><a href="#4-结构" class="headerlink" title="4. 结构"></a>4. 结构</h2><h3 id="4-1-文件结构"><a href="#4-1-文件结构" class="headerlink" title="4.1 文件结构"></a>4.1 文件结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">└── monkey</span><br><span class="line">    ├── Logger.java</span><br><span class="line">    ├── Monkey.java</span><br><span class="line">    ├── MonkeyActivityEvent.java</span><br><span class="line">    ├── MonkeyCommandEvent.java</span><br><span class="line">    ├── MonkeyEvent.java</span><br><span class="line">    ├── MonkeyEventQueue.java</span><br><span class="line">    ├── MonkeyEventSource.java</span><br><span class="line">    ├── MonkeyFlipEvent.java</span><br><span class="line">    ├── MonkeyGetAppFrameRateEvent.java</span><br><span class="line">    ├── MonkeyGetFrameRateEvent.java</span><br><span class="line">    ├── MonkeyInstrumentationEvent.java</span><br><span class="line">    ├── MonkeyKeyEvent.java</span><br><span class="line">    ├── MonkeyMotionEvent.java</span><br><span class="line">    ├── MonkeyNetworkMonitor.java</span><br><span class="line">    ├── MonkeyNoopEvent.java</span><br><span class="line">    ├── MonkeyPermissionEvent.java</span><br><span class="line">    ├── MonkeyPermissionUtil.java</span><br><span class="line">    ├── MonkeyPowerEvent.java</span><br><span class="line">    ├── MonkeyRotationEvent.java</span><br><span class="line">    ├── MonkeySourceNetwork.java</span><br><span class="line">    ├── MonkeySourceNetworkVars.java</span><br><span class="line">    ├── MonkeySourceNetworkViews.java</span><br><span class="line">    ├── MonkeySourceRandom.java</span><br><span class="line">    ├── MonkeySourceRandomScript.java</span><br><span class="line">    ├── MonkeySourceScript.java</span><br><span class="line">    ├── MonkeyThrottleEvent.java</span><br><span class="line">    ├── MonkeyTouchEvent.java</span><br><span class="line">    ├── MonkeyTrackballEvent.java</span><br><span class="line">    ├── MonkeyUtils.java</span><br><span class="line">    ├── MonkeyViewException.java</span><br><span class="line">    └── MonkeyWaitEvent.java</span><br></pre></td></tr></table></figure>
@@ -548,14 +575,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">6k</span>
+    <span title="站点总字数">7k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5 分钟</span>
+    <span title="站点阅读时长">6 分钟</span>
   </span>
 </div>
 
