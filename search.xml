@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Android-Monkey解析（二）</title>
+    <url>/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="Android-Monkey详细分解"><a href="#Android-Monkey详细分解" class="headerlink" title="Android-Monkey详细分解"></a>Android-Monkey详细分解</h1><h2 id="1-Monkey核心变量"><a href="#1-Monkey核心变量" class="headerlink" title="1. Monkey核心变量"></a>1. Monkey核心变量</h2><p>Monkey.mAm：使用AMS系统服务提供的功能（跨进程调用）</p>
+<p>Monkey.mWm：使用WMS系统服务提供的功能（跨进程调用）</p>
+<p>Monkey.mPm：使用PMS系统服务提供的功能（跨进程调用）</p>
+<p>Monkey.mEventSource：存放待执行随机事件</p>
+<pre class="mermaid">graph TD
+  Monkey.mAm --> android.app.IActivityManager[依赖 Android.app.IActivityManager]
+    Monkey.mWm --> android.view.IWindowManager[依赖 Android.view.IWindowManager]
+    Monkey.mPm --> android.content.pm.IPackageManager[依赖 Android.content.pm.IPackageManager]
+    Monkey.mEventSource --> MonkeyEventSource
+    mNetworkMonitor --> MonkeyNetworkMonitor
+    MonkeyNetworkMonitor --> android.content.IIntentReceiver[依赖 Android.content.IIntentReceiver]</pre>
+<h2 id="2-Monkey四种事件源"><a href="#2-Monkey四种事件源" class="headerlink" title="2. Monkey四种事件源"></a>2. Monkey四种事件源</h2><ol>
+<li>随机种子+随机数生成器随机生成事件：<code>MonkeySourceRandom</code></li>
+<li>单个Monkey脚本中的事件：<code>MonkeySourceScript</code></li>
+<li>N个Monkey脚本中的随机事件：<code>MonkeySourceRandomScript</code></li>
+<li>云端获取Monkey事件：<code>MonkeySourceNetwork</code></li>
+</ol>
+<pre class="mermaid">graph TD
+  MonkeyEventSource --> MonkeySourceRandom
+  MonkeyEventSource --> MonkeySourceScript
+    MonkeyEventSource --> MonkeySourceRandomScript
+    MonkeyEventSource --> MonkeySourceNetwork</pre>
+
+
+
+<h2 id="2-Monkey-java核心流程解析"><a href="#2-Monkey-java核心流程解析" class="headerlink" title="2. Monkey.java核心流程解析"></a>2. Monkey.java核心流程解析</h2><p>Monkey run的主流程：</p>
+<ol>
+<li>解析所有命令行输入参数</li>
+<li>依次判断如下输入参数<ul>
+<li>判断是否带有–wait-dbg参数：延迟执行、或立即执行</li>
+<li>判断是否带有-c参数：加载指定类别、或默认类别</li>
+<li>判断是否带有-s参数：指定随机种子、或默认自动生成新的随机种子</li>
+</ul>
+</li>
+<li>获取测试环境<ul>
+<li>加载正确被测Package名：基于黑白名单加载被测Package</li>
+<li>获取所有可获取的系统接口，即系统服务的初始化：AMS、PMS、WMS</li>
+<li>获取（受限）被测activity列表：-p、-s</li>
+</ul>
+</li>
+<li>基于不同模式执行Monkey动作<ul>
+<li>单一脚本模式执行：-setup</li>
+<li>多脚本模式执行：–randomize-script -f</li>
+<li>获取云上脚本执行：–port</li>
+<li>本地随机生成事件执行：默认</li>
+</ul>
+</li>
+<li>监控并生成分析报告<ul>
+<li>监控crash并统计</li>
+<li>执行前、后生成分析报告：–hprof</li>
+</ul>
+</li>
+</ol>
+<pre class="mermaid">graph TD    
+  Monkey.main[入口 main] --> Android.os.Process.setArgV0(依赖 Android.os.Process)
+  Android.os.Process.setArgV0 --> Monkey.run[运行 run]
+  Monkey.run --> Monkey.args_debug[是否含有debug参数]
+  Monkey.args_debug --true--> Android.os.Debug[依赖 Android.os.Debug]
+  Monkey.args_debug --false--> Monkey.processOptions[是否正确解析参数 processOptions]
+  Android.os.Debug --> Monkey.processOptions
+  Monkey.processOptions --true--> Monkey.loadPackageLists[是否加载正确包列表 loadPackageLists]
+  Monkey.processOptions --false--> Monkey.Return[Monkey.Return:-1,-2,-3,-4]
+  Monkey.loadPackageLists --true--> Monkey.mMainCategories_0[是否指定类别 mMainCategories==0]
+  Monkey.loadPackageLists --false--> Monkey.Return
+  Monkey.mMainCategories_0 --true--> Monkey.mSeed_0[是否指定随机种子 Monkey.mSeed==0]
+  Monkey.mMainCategories_0 --false--> Monkey.mMainCategories.add[加载默认类别 Monkey.mMainCategories.add]
+  Monkey.mMainCategories.add --> Monkey.mSeed_0
+  Monkey.mSeed_0 --true--> System.currentTimeMillis[依赖Java原生库生成随机种子 System.currentTimeMillis]
+  Monkey.mSeed_0 --false--> Monkey.getSystemInterfaces
+  checkInternalConfiguration[待分析 checkInternalConfiguration]
+  checkInternalConfiguration --false--> Monkey.Return
+  System.currentTimeMillis --> Monkey.getSystemInterfaces[获取系统所有接口 Monkey.getSystemInterfaces]
+  Monkey.getSystemInterfaces --false--> Monkey.Return
+  Monkey.getSystemInterfaces --true--> Monkey.getMainApps[是否获得被测APPs Monkey.getMainApps]
+  Monkey.getMainApps --true--> java.util.Random[依靠java原生库创建随机数生成器 java.util.Random]
+  Monkey.getMainApps --false--> Monkey.Return
+  java.util.Random --> mScriptFileNames_size_1[是否输入单一脚本 mScriptFileNames.size == 1]
+  mScriptFileNames_size_1 --true--> MonkeySourceScript[事件序列为单个脚本 MonkeySourceScript]
+  mScriptFileNames_size_1 --false--> Monkey.mScriptFileNames_size_n[是否输入多个脚本 Monkey.mScriptFileNames.size > 1]
+  Monkey.mScriptFileNames_size_n --true--> MonkeySourceRandomScript[事件序列为随机的输入脚本 MonkeySourceRandomScript]
+  Monkey.mScriptFileNames_size_n --false--> Monkey.mServerPort[是否指定联网获取事件序列 mServerPort != -1]
+  Monkey.mServerPort --true--> MonkeySourceNetwork[事件序列为从云上中获取的脚本 MonkeySourceNetwork]
+  Monkey.mServerPort --false--> MonkeySourceRandom[事件序列为本地随机生成 MonkeySourceRandom]
+  MonkeySourceRandom --> mEventSource.validate[验证随机生成事件序列是否有效 mEventSource.validate]
+  MonkeySourceNetwork --> mEventSource.validate
+  MonkeySourceRandomScript --> mEventSource.validate
+  MonkeySourceScript --> mEventSource.validate
+  mEventSource.validate --> mGenerateHprof[是否生成分析报告 mGenerateHprof]
+  mGenerateHprof --true--> Monkey.mAm.signalPersistentProcesses[应用报告同步打印 Monkey.mAm.signalPersistentProcesses]
+  Monkey.mAm.signalPersistentProcesses --> MonkeyNetworkMonitor.mNetworkMonitor.start[启动监控器用于监控执行过程 mNetworkMonitor.start]
+  mGenerateHprof --false--> MonkeyNetworkMonitor.mNetworkMonitor.start
+  MonkeyNetworkMonitor.mNetworkMonitor.start --> runMonkeyCycles[循环注入事件 runMonkeyCycles]
+  runMonkeyCycles --> MonkeyNetworkMonitor.mNetworkMonitor.stop[停止监控器 mNetworkMonitor.stop]
+  MonkeyNetworkMonitor.mNetworkMonitor.stop --> mGenerateHprof
+  MonkeyNetworkMonitor.mNetworkMonitor.stop --> clean_env[最后检查,收集日志,AMS解锁,事件状态dump,网络状态dump]</pre>
+
+
+
+]]></content>
+      <categories>
+        <category>Testing</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android-Monkey解析（三）</title>
+    <url>/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="Android-Monkey详细分解"><a href="#Android-Monkey详细分解" class="headerlink" title="Android-Monkey详细分解"></a>Android-Monkey详细分解</h1><h2 id="1-MonkeyNetworkMonitor-java核心依赖分析"><a href="#1-MonkeyNetworkMonitor-java核心依赖分析" class="headerlink" title="1. MonkeyNetworkMonitor.java核心依赖分析"></a>1. MonkeyNetworkMonitor.java核心依赖分析</h2><pre class="mermaid">graph LR
+    
+    
+    MonkeyNetworkMonitor.performReceive --> android.content.Intent[依赖 Android.content.Intent]
+    MonkeyNetworkMonitor.performReceive --> android.os.Bundle[依赖 Android.os.Bundle]
+    MonkeyNetworkMonitor.performReceive --> android.net.NetworkInfo[依赖 Android.net.NetworkInfo]
+
+    MonkeyNetworkMonitor.performReceive & MonkeyNetworkMonitor.register&unregister --> android.os.RemoteException[依赖 Android.os.RemoteException]
+    
+    MonkeyNetworkMonitor.updateNetworkStats & MonkeyNetworkMonitor.filter --> android.content.ConnectivityManager[依赖 Android.content.ConnectivityManager]
+    MonkeyNetworkMonitor.performReceive & MonkeyNetworkMonitor.updateNetworkStats & MonkeyNetworkMonitor.start --> android.os.SystemClock[依赖 Android.os.SystemClock]
+    
+    MonkeyNetworkMonitor.register&unregister --> android.app.IActivityManager[依赖 Android.app.IActivityManager]
+    MonkeyNetworkMonitor.register&unregister --> android.os.UserHandle[依赖 Android.os.UserHandle]
+    
+    MonkeyNetworkMonitor.filter --> android.content.IntentFilter[依赖 Android.content.IntentFilter]
+    
+    MonkeyNetworkMonitor.stop --> MonkeyNetworkMonitor.updateNetworkStats
+    MonkeyNetworkMonitor.dump</pre>
+]]></content>
+      <categories>
+        <category>Testing</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android-Monkey解析（一）</title>
+    <url>/2021/12/11/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="Android-Monkey概要分析"><a href="#Android-Monkey概要分析" class="headerlink" title="Android-Monkey概要分析"></a>Android-Monkey概要分析</h1><h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h2><ul>
+<li>形式：命令行工具</li>
+<li>本质：Monkey是一个模拟器、设备上运行的程序</li>
+<li>用途：对开发的应用作压力测</li>
+<li>基本语法<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">adb shell monkey [options] &lt;event-count&gt;</span><br></pre></td></tr></table></figure></li>
+<li>具体实例<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">adb shell monkey -p your.package.name -v 500</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="2-能力"><a href="#2-能力" class="headerlink" title="2. 能力"></a>2. 能力</h2><ol>
+<li>事件生成：Monkey可生成伪随机用户事件流（譬如轻触、点击、手势）和很多系统级事件</li>
+<li>事件注入：Monkey将事件流发送到系统中</li>
+<li>系统监控：应用崩溃、响应超时，Monkey会停止并报告错误</li>
+</ol>
+<h2 id="3-选项"><a href="#3-选项" class="headerlink" title="3. 选项"></a>3. 选项</h2><p>基于Monkey命令行选项，分析功能和使用状况。</p>
+<table>
+  <tr>
+    <th bgcolor=#B0C4DE>类型</th>
+    <th bgcolor=#B0C4DE>选项</th>
+    <th bgcolor=#B0C4DE>功能</th>
+    <th bgcolor=#B0C4DE>使用</th>
+  </tr>
+  <tr>
+    <td rowspan="2">常规参数</td>
+    <td>-help</td>
+    <td>输出使用指南</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+      <td>-v</td>
+    <td>指定反馈信息级别，即日志详细程度，共三级，使用多级时，需要多次使用-v</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+      <td rowspan="14">事件</td>
+      <td>-s</td>
+    <td>指定伪随机数生成器的seed值，如果seed值相同，则两次monkey测试产生的事件序列也相同</td>
+      <td bgcolor=#FFD700>常用</td>
+  <tr>
+  </tr>
+      <td>--throttle</td>
+    <td>指定注入事件间的时延间隔，单位ms；如果未指定，则不延迟，系统会尽快地生成事件；常见为300ms</td>
+      <td bgcolor=#FFD700>常用</td>
+  <tr>
+    <td>--pct-touch</td>
+    <td>调整<span style="color:red">轻触事件</span>所占百分比（屏幕上单个位置上按下、释放事件）</td>
+      <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--pct-motion</td>
+    <td>调整<span style="color:red">滑动事件</span>所占百分比（屏幕上某个位置按下、一系列伪随机滑动动作、释放事件）</td>
+      <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--pct-trackball</td>
+    <td>调整<span style="color:red">轨迹球事件</span>所占百分比（一个或多个随机动作，有时会触发点击）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-syskeys</td>
+    <td>调整<span style="color:red">系统按键事件</span>所占百分比（预留系统使用：主屏幕、返回、发起通话、结束通话、音量控制，百分比较小）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-nav</td>
+    <td>调整<span style="color:red">基本导航事件</span>所占百分比（输入设备的上、下、左、右作为方向）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-majornav</td>
+    <td>调整<span style="color:red">主要导航事件</span>所占百分比（5-way键盘的菜单键、中间键、回退键）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-appswitch</td>
+    <td>调整<span style="color:red">Activity启动事件</span>所占百分比（以最大限度覆盖软件包中所有Activity）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-flip</td>
+    <td>调整<span style="color:red">键盘按键事件</span>所占百分比（与键盘相关操作，如点击输入框键盘弹起、点击输入框外侧键盘回收）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-anyevent</td>
+    <td>调整<span style="color:red">其他类型事件</span>所占百分比（包括所有其他类型事件：按键、不常用按钮等，不常用）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pct-pinchzoom</td>
+    <td>调整<span style="color:red">缩放事件</span>所占百分比（模拟进行放大缩小操作：两处同时按下、同时移动、同时抬起）</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--pct-permission</td>
+    <td>调整<span style="color:red">权限事件</span>所占百分比（待分析）</td>
+      <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td rowspan="2">约束</td>
+      <td>-p</td>
+    <td>指定一个或多个app包，不使用时默认允许启动所有app</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>-c</td>
+    <td>指定一个或多个类别，不使用时选择Intent.CATEGORY_LAUNCHER或Intent.GATEGORY_MONKEY类别所列的Activity</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td rowspan="9">调试</td>
+    <td>--dbg-no-events</td>
+    <td>将初始启动到测试Activity，但不会生成任何事件</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--hprof</td>
+    <td>在Monkey事件序列之前和之后立即生成分析报告，将在/data/misc下生成大型（约5M）文件</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--ignore-crashes</td>
+    <td>应用发生崩溃或异常时，Monkey将忽略并继续发事件给系统，直至事件计数结束</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--ignore-timeouts</td>
+    <td>应用程序发生超时错误时，Monkey将忽略并继续发事件给系统，直至事件计数结束</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--ignore-security-exceptions</td>
+    <td>应用程序发生权限错误导致异常时，Monkey将忽略并继续发事件给系统，直至事件计数结束</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--kill-process-after-error</td>
+    <td>当Monkey由于应用程序出错停止时，将通知系统停止发生错误的进程（PS：正常结束并不会停止已启动的进程，设备会停留在最后状态）</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--monitor-native-crashes</td>
+    <td>监视并上报系统原生代码中发生的崩溃，可配合--kill-process-after-error选项使用</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--wait-dbg</td>
+    <td>阻止Monkey执行，直到为其连接了调试程序</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>COUNT</td>
+    <td>次数</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td rowspan="4">脚本</td>
+    <td>-setup</td>
+    <td>执行单个脚本</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>-f</td>
+    <td>多次调用，执行多个脚本</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--port</td>
+    <td>连接服务器，执行TCP从连接服务器中获取的Monkey脚本</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td>--randomize-script</td>
+    <td>执行随机Monkey脚本，需要和-f一起使用</td>
+    <td bgcolor=#FFD700>常用</td>
+  </tr>
+  <tr>
+    <td rowspan="2">名单</td>
+    <td>--pkg-blacklist-file</td>
+    <td>白名单列表</td>
+    <td>不常用</td>
+  </tr>
+  <tr>
+    <td>--pkg-whitelist-file</td>
+    <td>黑名单列表</td>
+    <td>不常用</td>
+  </tr>
+</table
+
+
+
+<h2 id="4-结构"><a href="#4-结构" class="headerlink" title="4. 结构"></a>4. 结构</h2><h3 id="4-1-文件结构"><a href="#4-1-文件结构" class="headerlink" title="4.1 文件结构"></a>4.1 文件结构</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">└── monkey</span><br><span class="line">    ├── Logger.java</span><br><span class="line">    ├── Monkey.java</span><br><span class="line">    ├── MonkeyActivityEvent.java</span><br><span class="line">    ├── MonkeyCommandEvent.java</span><br><span class="line">    ├── MonkeyEvent.java</span><br><span class="line">    ├── MonkeyEventQueue.java</span><br><span class="line">    ├── MonkeyEventSource.java</span><br><span class="line">    ├── MonkeyFlipEvent.java</span><br><span class="line">    ├── MonkeyGetAppFrameRateEvent.java</span><br><span class="line">    ├── MonkeyGetFrameRateEvent.java</span><br><span class="line">    ├── MonkeyInstrumentationEvent.java</span><br><span class="line">    ├── MonkeyKeyEvent.java</span><br><span class="line">    ├── MonkeyMotionEvent.java</span><br><span class="line">    ├── MonkeyNetworkMonitor.java</span><br><span class="line">    ├── MonkeyNoopEvent.java</span><br><span class="line">    ├── MonkeyPermissionEvent.java</span><br><span class="line">    ├── MonkeyPermissionUtil.java</span><br><span class="line">    ├── MonkeyPowerEvent.java</span><br><span class="line">    ├── MonkeyRotationEvent.java</span><br><span class="line">    ├── MonkeySourceNetwork.java</span><br><span class="line">    ├── MonkeySourceNetworkVars.java</span><br><span class="line">    ├── MonkeySourceNetworkViews.java</span><br><span class="line">    ├── MonkeySourceRandom.java</span><br><span class="line">    ├── MonkeySourceRandomScript.java</span><br><span class="line">    ├── MonkeySourceScript.java</span><br><span class="line">    ├── MonkeyThrottleEvent.java</span><br><span class="line">    ├── MonkeyTouchEvent.java</span><br><span class="line">    ├── MonkeyTrackballEvent.java</span><br><span class="line">    ├── MonkeyUtils.java</span><br><span class="line">    ├── MonkeyViewException.java</span><br><span class="line">    └── MonkeyWaitEvent.java</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-事件类型"><a href="#4-2-事件类型" class="headerlink" title="4.2 事件类型"></a>4.2 事件类型</h3><pre class="mermaid">classDiagram
+    class MonkeyEvent{
+    }
+    class MonkeyKeyEvent{
+    }
+    class MonkeyMotionEvent{
+    }
+    class MonkeyTouchEvent{
+    }
+    class MonkeyTrackballEvent{
+    }
+    class MonkeyRotationEvent{
+    }
+    class MonkeyActivityEvent{
+    }
+    class MonkeyFlipEvent{
+    }
+    class MonkeyThrottleEvent{
+    }
+    class MonkeyPermissionEvent{
+    }
+    class MonkeyNoopEvent{
+    }
+    
+    MonkeyEvent <-- MonkeyKeyEvent
+    MonkeyEvent <-- MonkeyMotionEvent
+    MonkeyEvent <-- MonkeyRotationEvent
+    MonkeyEvent <-- MonkeyActivityEvent
+    MonkeyEvent <-- MonkeyFlipEvent
+    MonkeyEvent <-- MonkeyThrottleEvent
+    MonkeyEvent <-- MonkeyPermissionEvent
+    MonkeyEvent <-- MonkeyNoopEvent
+    MonkeyMotionEvent <-- MonkeyTouchEvent
+    MonkeyMotionEvent <-- MonkeyTrackballEvent</pre>
+
+<p>MonkeyEvent基类中定义:</p>
+<blockquote>
+<ul>
+<li>9种事件类型参数：<ul>
+<li>常用事件：Key事件、Touch事件、Rotation事件、Permission事件、Noop事件</li>
+<li>不常用事件：Trackball事件、Activity事件、Flip事件、Throttle事件、</li>
+</ul>
+</li>
+<li>4种执行结果参数：<ul>
+<li>正常执行：Success、Fail</li>
+<li>异常返回：Remote Exception、Security Exception</li>
+</ul>
+</li>
+<li>3种方法：<ul>
+<li><code>injectEvent(IWindowManager iwm, IActivityManager iam, int verbose)</code>：依赖WMS、AMS，进行事件注入</li>
+<li><code>isThrottlable()</code>：判断事件是否需要做延迟</li>
+<li><code>getEventType()</code>：获取当前事件类型</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h3 id="4-3-事件"><a href="#4-3-事件" class="headerlink" title="4.3 事件"></a>4.3 事件</h3><h2 id="5-代码统计"><a href="#5-代码统计" class="headerlink" title="5. 代码统计"></a>5. 代码统计</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Language                     files          blank        comment           code</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">Java                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">SUM:                            31            749           1571           4427</span><br><span class="line">-------------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>Testing</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+</search>
