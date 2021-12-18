@@ -226,104 +226,6 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CurryQi">
-      <meta itemprop="description" content="C‘est la vie">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CurryQi's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/" class="post-title-link" itemprop="url">Android-Monkey解析（三）</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-12-12 21:51:55 / 修改时间：22:33:44" itemprop="dateCreated datePublished" datetime="2021-12-12T21:51:55+08:00">2021-12-12</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Android-Monkey详细分解"><a href="#Android-Monkey详细分解" class="headerlink" title="Android-Monkey详细分解"></a>Android-Monkey详细分解</h1><h2 id="1-MonkeyNetworkMonitor-java核心依赖分析"><a href="#1-MonkeyNetworkMonitor-java核心依赖分析" class="headerlink" title="1. MonkeyNetworkMonitor.java核心依赖分析"></a>1. MonkeyNetworkMonitor.java核心依赖分析</h2><pre class="mermaid">graph LR
-    
-    
-    MonkeyNetworkMonitor.performReceive --> android.content.Intent[依赖 Android.content.Intent]
-    MonkeyNetworkMonitor.performReceive --> android.os.Bundle[依赖 Android.os.Bundle]
-    MonkeyNetworkMonitor.performReceive --> android.net.NetworkInfo[依赖 Android.net.NetworkInfo]
-
-    MonkeyNetworkMonitor.performReceive & MonkeyNetworkMonitor.register&unregister --> android.os.RemoteException[依赖 Android.os.RemoteException]
-    
-    MonkeyNetworkMonitor.updateNetworkStats & MonkeyNetworkMonitor.filter --> android.content.ConnectivityManager[依赖 Android.content.ConnectivityManager]
-    MonkeyNetworkMonitor.performReceive & MonkeyNetworkMonitor.updateNetworkStats & MonkeyNetworkMonitor.start --> android.os.SystemClock[依赖 Android.os.SystemClock]
-    
-    MonkeyNetworkMonitor.register&unregister --> android.app.IActivityManager[依赖 Android.app.IActivityManager]
-    MonkeyNetworkMonitor.register&unregister --> android.os.UserHandle[依赖 Android.os.UserHandle]
-    
-    MonkeyNetworkMonitor.filter --> android.content.IntentFilter[依赖 Android.content.IntentFilter]
-    
-    MonkeyNetworkMonitor.stop --> MonkeyNetworkMonitor.updateNetworkStats
-    MonkeyNetworkMonitor.dump</pre>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%BA%8C%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -355,7 +257,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2021-12-18 17:00:27" itemprop="dateModified" datetime="2021-12-18T17:00:27+08:00">2021-12-18</time>
+      <time title="修改时间：2021-12-18 17:02:16" itemprop="dateModified" datetime="2021-12-18T17:02:16+08:00">2021-12-18</time>
     </span>
 
   
@@ -481,6 +383,104 @@
 
 
 
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CurryQi">
+      <meta itemprop="description" content="C‘est la vie">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CurryQi's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/12/12/Android-Monkey%E8%A7%A3%E6%9E%90%EF%BC%88%E4%B8%89%EF%BC%89/" class="post-title-link" itemprop="url">Android-Monkey解析（三）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-12-12 21:51:55 / 修改时间：22:33:44" itemprop="dateCreated datePublished" datetime="2021-12-12T21:51:55+08:00">2021-12-12</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Android-Monkey详细分解"><a href="#Android-Monkey详细分解" class="headerlink" title="Android-Monkey详细分解"></a>Android-Monkey详细分解</h1><h2 id="1-MonkeyNetworkMonitor-java核心依赖分析"><a href="#1-MonkeyNetworkMonitor-java核心依赖分析" class="headerlink" title="1. MonkeyNetworkMonitor.java核心依赖分析"></a>1. MonkeyNetworkMonitor.java核心依赖分析</h2><pre class="mermaid">graph LR
+    
+    
+    MonkeyNetworkMonitor.performReceive --> android.content.Intent[依赖 Android.content.Intent]
+    MonkeyNetworkMonitor.performReceive --> android.os.Bundle[依赖 Android.os.Bundle]
+    MonkeyNetworkMonitor.performReceive --> android.net.NetworkInfo[依赖 Android.net.NetworkInfo]
+
+    MonkeyNetworkMonitor.performReceive & MonkeyNetworkMonitor.register&unregister --> android.os.RemoteException[依赖 Android.os.RemoteException]
+    
+    MonkeyNetworkMonitor.updateNetworkStats & MonkeyNetworkMonitor.filter --> android.content.ConnectivityManager[依赖 Android.content.ConnectivityManager]
+    MonkeyNetworkMonitor.performReceive & MonkeyNetworkMonitor.updateNetworkStats & MonkeyNetworkMonitor.start --> android.os.SystemClock[依赖 Android.os.SystemClock]
+    
+    MonkeyNetworkMonitor.register&unregister --> android.app.IActivityManager[依赖 Android.app.IActivityManager]
+    MonkeyNetworkMonitor.register&unregister --> android.os.UserHandle[依赖 Android.os.UserHandle]
+    
+    MonkeyNetworkMonitor.filter --> android.content.IntentFilter[依赖 Android.content.IntentFilter]
+    
+    MonkeyNetworkMonitor.stop --> MonkeyNetworkMonitor.updateNetworkStats
+    MonkeyNetworkMonitor.dump</pre>
 
       
     </div>
